@@ -18,7 +18,9 @@ module.exports = async (req, res) => {
   }
 
   try {
-    await Url.db.readyState || await Url.connectDB(); // 新增：确保数据库已连接
+    // 通过模型静态方法调用 connectDB
+    await Url.connectDB(); 
+    
     let existingUrl = await Url.findOne({ original_url: url });
     if (existingUrl) {
       return res.json({ original_url: existingUrl.original_url, short_url: existingUrl.short_url });
@@ -30,8 +32,8 @@ module.exports = async (req, res) => {
 
     return res.status(201).json({ original_url: newUrl.original_url, short_url: newUrl.short_url });
   } catch (err) {
-    console.error('Server error:', err); // 关键：查看控制台输出具体错误信息（如数据库认证失败、唯一索引冲突等）
-    return res.status(500).json({ error: 'Server error: ' + err.message }); // 向前端返回具体错误信息（仅调试时使用，生产环境需隐藏敏感信息）
+    console.error('Server error:', err);
+    return res.status(500).json({ error: 'Server error: ' + err.message });
   }
 };
   

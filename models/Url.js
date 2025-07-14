@@ -1,6 +1,6 @@
 const mongoose = require('mongoose');
 
-// 连接MongoDB
+// 定义连接函数
 const connectDB = async () => {
   if (mongoose.connections[0].readyState) return; // 避免重复连接
   try {
@@ -8,28 +8,22 @@ const connectDB = async () => {
     console.log('MongoDB connected successfully');
   } catch (err) {
     console.error('MongoDB connection error:', err.message);
-    throw new Error('Database connection failed'); // 此错误会在接口中被捕获
+    throw new Error('Database connection failed');
   }
 };
 
 // 定义URL模型
 const urlSchema = new mongoose.Schema({
-  original_url: {
-    type: String,
-    required: true,
-    unique: true,
-    trim: true
-  },
-  short_url: {
-    type: Number,
-    required: true,
-    unique: true
-  }
+  original_url: { type: String, required: true, unique: true, trim: true },
+  short_url: { type: Number, required: true, unique: true }
 });
 
-// 生成下一个short_url（基于现有记录数量）
+// 将 connectDB 添加为模型的静态方法
+urlSchema.statics.connectDB = connectDB;
+
+// 生成下一个short_url（确保连接后查询）
 urlSchema.statics.getNextShortUrl = async function () {
-  await connectDB(); // 确保查询前已连接
+  await this.connectDB(); // 通过 this 调用当前模型的静态方法
   const count = await this.countDocuments({});
   return count + 1;
 };
