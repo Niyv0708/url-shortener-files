@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>URL短链接生成器</title>
+</head>
+<body>
+  <h1>生成短链接</h1>
+  <form id="urlForm">
+    <input type="url" id="originalUrl" placeholder="输入长链接（需包含http/https）" required>
+    <button type="submit">生成短链接</button>
+  </form>
+  <div id="result"></div>
+
+  <script>
+    document.getElementById('urlForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const url = document.getElementById('originalUrl').value;
+      try {
+        const response = await fetch('/api/shorturl', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ url })
+        });
+        const data = await response.json();
+        if (response.ok) {
+          document.getElementById('result').innerHTML = `短链接：${window.location.origin}/api/shorturl/${data.short_url}`;
+        } else {
+          document.getElementById('result').innerHTML = `错误：${data.error}`;
+        }
+      } catch (err) {
+        document.getElementById('result').innerHTML = '请求失败';
+      }
+    });
+  </script>
+</body>
+</html>
