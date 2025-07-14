@@ -20,10 +20,16 @@ const urlSchema = new mongoose.Schema({
 
 urlSchema.statics.connectDB = connectDB;
 
+// 生成下一个short_url（原子操作，避免并发冲突）
 urlSchema.statics.getNextShortUrl = async function () {
   await this.connectDB();
-  const count = await this.countDocuments({});
-  return count + 1;
+  // 使用一个单独的计数器文档（若不存在则创建）
+  const counter = await this.collection.findOneAndUpdate(
+    { _id: 'shortUrlCounter' },
+    { $inc: { sequence_value: 1 } },
+    { upsert: true, returnDocument: 'after' }
+  );
+  return counter.value.sequence_value;
 };
 
 module.exports = mongoose.models.Url || mongoose.model('Url', urlSchema);
