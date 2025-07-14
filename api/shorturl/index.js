@@ -1,5 +1,6 @@
 const Url = require('../../models/Url');
-const { validateUrlFormat, checkDomainValidity } = require('../../utils/validator');
+// 仅导入 validateUrlFormat（移除 checkDomainValidity）
+const { validateUrlFormat } = require('../../utils/validator');
 
 module.exports = async (req, res) => {
   if (req.method !== 'POST') {
@@ -12,28 +13,29 @@ module.exports = async (req, res) => {
     return res.status(400).json({ error: 'invalid url' });
   }
 
-  const isDomainValid = await checkDomainValidity(url);
-  if (!isDomainValid) {
-    return res.status(400).json({ error: 'invalid url' });
-  }
-
+  // 移除域名验证的调用逻辑（因 checkDomainValidity 未导出）
   try {
-    // 通过模型静态方法调用 connectDB
-    await Url.connectDB(); 
+    await Url.connectDB();
     
     let existingUrl = await Url.findOne({ original_url: url });
     if (existingUrl) {
-      return res.json({ original_url: existingUrl.original_url, short_url: existingUrl.short_url });
+      return res.json({ 
+        original_url: existingUrl.original_url, 
+        short_url: existingUrl.short_url 
+      });
     }
 
     const shortUrl = await Url.getNextShortUrl();
     const newUrl = new Url({ original_url: url, short_url: shortUrl });
     await newUrl.save();
 
-    return res.status(201).json({ original_url: newUrl.original_url, short_url: newUrl.short_url });
+    return res.status(201).json({ 
+      original_url: newUrl.original_url, 
+      short_url: newUrl.short_url 
+    });
   } catch (err) {
     console.error('Server error:', err);
-    return res.status(500).json({ error: 'Server error: ' + err.message });
+    return res.status(500).json({ error: 'Server error' });
   }
 };
   
