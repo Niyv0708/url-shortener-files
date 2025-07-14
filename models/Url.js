@@ -22,13 +22,13 @@ const urlSchema = new mongoose.Schema({
 
 urlSchema.statics.connectDB = connectDB;
 
-// 生成下一个short_url（原子操作，避免并发冲突）
+// 生成下一个short_url（原子操作，确保初始值）
 urlSchema.statics.getNextShortUrl = async function () {
   await this.connectDB();
-  // 使用一个单独的计数器文档（若不存在则创建）
+  // 关键修改：upsert时设置初始sequence_value为1
   const counter = await this.collection.findOneAndUpdate(
     { _id: 'shortUrlCounter' },
-    { $inc: { sequence_value: 1 } },
+    { $inc: { sequence_value: 1 }, $setOnInsert: { sequence_value: 1 } }, // 新增$setOnInsert初始化
     { upsert: true, returnDocument: 'after' }
   );
   return counter.value.sequence_value;
