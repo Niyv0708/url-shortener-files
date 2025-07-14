@@ -1,14 +1,16 @@
 const mongoose = require('mongoose');
 
-// 定义连接函数（增强错误日志）
 const connectDB = async () => {
-  if (mongoose.connections[0].readyState) return; // 避免重复连接
+  if (mongoose.connections[0].readyState) return; 
   try {
-    await mongoose.connect(process.env.MONGODB_URI);
+    // 新增：显式设置连接超时（30秒）和认证源（可选）
+    await mongoose.connect(process.env.MONGODB_URI, {
+      connectTimeoutMS: 30000, // 延长连接超时时间
+      authSource: 'admin'       // 若数据库认证源非默认，需指定（如 'admin'）
+    });
     console.log('MongoDB connected successfully');
   } catch (err) {
-    // 输出完整错误堆栈（包含具体原因，如认证失败、DNS解析失败等）
-    console.error('MongoDB connection error:', err.stack); 
+    console.error('MongoDB connection error:', err.stack); // 输出完整错误堆栈
     throw new Error('Database connection failed');
   }
 };
