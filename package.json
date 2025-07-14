@@ -3,7 +3,9 @@
   "version": "1.0.0",
   "dependencies": {
     "mongoose": "^7.5.0",
-    "vercel": "^32.4.1"
+    "vercel": "^32.4.1",
+    "uuid": "^9.0.0",  // 新增并升级uuid版本
+    "debug": "^4.3.4"  // 新增并升级debug版本
   }
 }
   
