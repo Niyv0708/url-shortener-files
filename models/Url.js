@@ -25,13 +25,12 @@ urlSchema.statics.connectDB = connectDB;
 // 生成下一个short_url（原子操作，确保初始值）
 urlSchema.statics.getNextShortUrl = async function () {
   await this.connectDB();
-  // 关键修改：upsert时设置初始sequence_value为1
   const counter = await this.collection.findOneAndUpdate(
     { _id: 'shortUrlCounter' },
-    { $inc: { sequence_value: 1 }, $setOnInsert: { sequence_value: 1 } }, // 新增$setOnInsert初始化
+    { $inc: { sequence_value: 1 } },
     { upsert: true, returnDocument: 'after' }
   );
-  return counter.value.sequence_value;
+  return counter.value ? counter.value.sequence_value : 1;
 };
 
 module.exports = mongoose.models.Url || mongoose.model('Url', urlSchema);
