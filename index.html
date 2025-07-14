@@ -25,10 +25,12 @@
         if (response.ok) {
           document.getElementById('result').innerHTML = `短链接：${window.location.origin}/api/shorturl/${data.short_url}`;
         } else {
-          document.getElementById('result').innerHTML = `错误：${data.error}`;
+          // 显示后端返回的具体错误（如数据库连接失败、唯一索引冲突等）
+          document.getElementById('result').innerHTML = `错误：${data.error}`; 
         }
       } catch (err) {
-        document.getElementById('result').innerHTML = '请求失败';
+        // 显示网络错误或解析错误
+        document.getElementById('result').innerHTML = `请求失败：${err.message}`; 
       }
     });
   </script>
